@@ -106,10 +106,10 @@ namespace HandPoseTransfer.OculusQuest
             var skeletonBuilder = new SkeletonBuilder(this.transform);
             skeletonBuilder.AddBasicSkeleton(new SkeletonBuilderParams());
 
-            var leftHandRotation = Quaternion.Euler(0, 0, 180);
+            var leftHandRotation = Quaternion.Euler(0, 180, 180);
             skeletonBuilder.UpdateRotation(HumanBodyBones.LeftHand, leftHandRotation);
 
-            var rightHandRotation = Quaternion.Euler(0, 180, 0);
+            var rightHandRotation = Quaternion.Euler(0, 0, 0);
             skeletonBuilder.UpdateRotation(HumanBodyBones.RightHand, rightHandRotation);
 
             _LeftHandOVRSkelton = _LeftOVRHand.GetComponent<OVRSkeleton>();
