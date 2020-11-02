@@ -26,7 +26,8 @@ You need to import the following assets.
 
 このプロジェクトには、以下のアセットが含まれています。  
 The following assets are included in this project.
-- [UniTask 2.0.36](https://github.com/Cysharp/UniTask/releases/tag/2.0.36)
+- [UniTask 2.0.36](https://github.com/Cysharp/UniTask/releases/tag/2.0.36)  
+Licensed under the MIT License. Copyright (c) 2019 Yoshifumi Kawai / Cysharp, Inc.
 
 - [XR Mecanim IK Plus](http://chobi-glass.com/Unity/XR_MecanimIKPlus.html)  
 Copyright (c) 2017 Chobi (@chobi_luck).
