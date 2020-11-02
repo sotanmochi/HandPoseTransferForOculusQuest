@@ -11,9 +11,9 @@ Oculus Quest Hand Tracking and Humanoid Avatar Hand Pose Control
 <img src="./Assets/HandPoseTransfer/Examples/Images/HandPoseTransferForOculusQuest_04.jpg" width="40%">
 
 ## Tested Environment
-- Unity 2018.4.21f1
-- Oculus Integration 16.0
-- Oculus Quest (Runtime version: 16.0)
+- Unity 2018.4.28f1
+- Oculus Integration 20.1
+- Oculus Quest (Runtime version: 20.0)
 
 ## License
 このプロジェクトは、サードパーティのアセットを除き、MIT Licenseでライセンスされています。  
@@ -22,7 +22,7 @@ This project is licensed under the MIT License excluding third party assets.
 ## Third party assets
 以下のアセットをインポートする必要があります。  
 You need to import the following assets.
-- [Oculus Integration](https://assetstore.unity.com/packages/tools/integration/oculus-integration-82022)
+- [Oculus Integration 20.1](https://developer.oculus.com/downloads/package/unity-integration-archive/20.1/)
 
 このプロジェクトには、以下のアセットが含まれています。  
 The following assets are included in this project.
