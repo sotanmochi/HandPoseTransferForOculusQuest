@@ -19,6 +19,8 @@ Assets/Plugins/*
 # ======================================= #
 # Third party assets (Not ignored assets)
 # ======================================= #
+!Assets/Plugins/UniTask
+!Assets/Plugins/UniTask.meta
 !Assets/Models
 !Assets/Models.meta
 !Assets/VRM

@@ -22,6 +22,7 @@ Hand Tracking and Humanoid Avatar Hand Pose Control
 以下のアセットをインポートする必要があります。  
 You need to import the following assets.
 - [Oculus Integration 20.1](https://developer.oculus.com/downloads/package/unity-integration-archive/20.1/)
+- [UniTask 2.0.36](https://github.com/Cysharp/UniTask/releases/tag/2.0.36)
 
 ## Third party assets for Examples
 サンプルシーンには以下のアセットをインポートする必要があります。  
