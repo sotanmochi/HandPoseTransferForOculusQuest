@@ -29,13 +29,11 @@ namespace HandPoseTransfer.OculusQuest
         [SerializeField] GameObject _XYZAxisPrefab;
         [SerializeField] float _AxisObjectScale = 0.2f;
 
+        Animator _TargetAnimator;
         HumanPoseHandler _SrcPoseHandler;
         HumanPoseHandler _TargetPoseHandler;
         HumanPose _SourcePose;
         HumanPose _TargetPose;
-
-        Transform _TargetLeftHandWrist;
-        Transform _TargetRightHandWrist;
 
         async void Start()
         {
@@ -93,14 +91,18 @@ namespace HandPoseTransfer.OculusQuest
                     _TargetPoseHandler.SetHumanPose(ref _TargetPose);
                 }
 
-                // Update wrist pose
-                if (_TargetHumanoidAvatar != null && _WristController != null)
-                {
-                    _TargetLeftHandWrist.position = _WristController._LeftHandTrackingReference.position;
-                    _TargetLeftHandWrist.rotation = _WristController._LeftHandTrackingReference.rotation;
-                    _TargetRightHandWrist.position = _WristController._RightHandTrackingReference.position;
-                    _TargetRightHandWrist.rotation = _WristController._RightHandTrackingReference.rotation;
-                }
+            }
+        }
+
+        void OnAnimatorIK(int layerIndex)
+        {
+            // Update wrist pose
+            if (_TargetAnimator != null && _WristController != null)
+            {
+                _TargetAnimator.SetIKPosition(AvatarIKGoal.LeftHand, _WristController._LeftHandTrackingReference.position);
+                _TargetAnimator.SetIKRotation(AvatarIKGoal.LeftHand, _WristController._LeftHandTrackingReference.rotation);
+                _TargetAnimator.SetIKPosition(AvatarIKGoal.RightHand, _WristController._RightHandTrackingReference.position);
+                _TargetAnimator.SetIKRotation(AvatarIKGoal.RightHand, _WristController._RightHandTrackingReference.rotation);
             }
         }
 
@@ -108,10 +110,8 @@ namespace HandPoseTransfer.OculusQuest
         {
             if (_TargetHumanoidAvatar != null)
             {
-                var targetAnimator = _TargetHumanoidAvatar.GetComponent<Animator>();
-                _TargetPoseHandler = new HumanPoseHandler(targetAnimator.avatar, _TargetHumanoidAvatar.transform);
-                _TargetLeftHandWrist = targetAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
-                _TargetRightHandWrist = targetAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+                _TargetAnimator = _TargetHumanoidAvatar.GetComponent<Animator>();
+                _TargetPoseHandler = new HumanPoseHandler(_TargetAnimator.avatar, _TargetHumanoidAvatar.transform);
             }
         }
 
