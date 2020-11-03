@@ -3,12 +3,15 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace HandPoseTransfer.OculusQuest
 {
     [RequireComponent(typeof(OculusWristController))]
     public class OculusHandPoseTransfer : MonoBehaviour
     {
+        public bool IsAvailable { get; private set; }
+
         [SerializeField] OculusWristController _WristController;
         [SerializeField] OVRHand _LeftOVRHand;
         [SerializeField] OVRHand _RightOVRHand;
@@ -26,16 +29,24 @@ namespace HandPoseTransfer.OculusQuest
         [SerializeField] GameObject _XYZAxisPrefab;
         [SerializeField] float _AxisObjectScale = 0.2f;
 
+        Animator _TargetAnimator;
         HumanPoseHandler _SrcPoseHandler;
         HumanPoseHandler _TargetPoseHandler;
         HumanPose _SourcePose;
         HumanPose _TargetPose;
 
-        Transform _TargetLeftHandWrist;
-        Transform _TargetRightHandWrist;
-
-        void Start()
+        async void Start()
         {
+            _LeftHandOVRSkelton = _LeftOVRHand.GetComponent<OVRSkeleton>();
+            _RightHandOVRSkelton = _RightOVRHand.GetComponent<OVRSkeleton>();
+
+#if UNITY_EDITOR
+            _LeftHandOVRSkelton.ShouldUpdateBonePoses = true;
+            _RightHandOVRSkelton.ShouldUpdateBonePoses = true;
+#endif
+            await UniTask.WaitUntil(() => (_LeftHandOVRSkelton.IsInitialized));
+            await UniTask.WaitUntil(() => (_RightHandOVRSkelton.IsInitialized));
+
             Initialize();
             SetTargetPoseHandler();
 
@@ -44,45 +55,54 @@ namespace HandPoseTransfer.OculusQuest
                 _WristController = GetComponent<OculusWristController>();
             }
             _WristController._LeftOVRHand = _LeftOVRHand;
-            _WristController._LeftOVRHand = _RightOVRHand;
+            _WristController._RightOVRHand = _RightOVRHand;
+
+            IsAvailable = true;
         }
 
         void LateUpdate()
         {
-            // Update hand pose
-            if (_LeftOVRHand.IsTracked)
+            if (IsAvailable)
             {
-                UpdateHandSkeletonBones(true);
-            }
-            if (_RightOVRHand.IsTracked)
-            {            
-                UpdateHandSkeletonBones(false);
-            }
-
-            if (_TargetPoseHandler != null)
-            {
-                // Get current human poses
-                _SrcPoseHandler.GetHumanPose(ref _SourcePose);
-                _TargetPoseHandler.GetHumanPose(ref _TargetPose);
-
-                // Update avatar hand pose
-                for (int i = 55; i < 95; i++)
+                // Update hand pose
+                if (_LeftOVRHand.IsTracked)
                 {
-                    _TargetPose.muscles[i] = _SourcePose.muscles[i];
+                    UpdateHandSkeletonBones(true);
+                }
+                if (_RightOVRHand.IsTracked)
+                {            
+                    UpdateHandSkeletonBones(false);
                 }
 
-                // Update avatar human pose
-                _TargetPose.bodyPosition = _TargetPose.bodyPosition + BodyPositionCorrection;
-                _TargetPoseHandler.SetHumanPose(ref _TargetPose);
-            }
+                if (_TargetPoseHandler != null)
+                {
+                    // Get current human poses
+                    _SrcPoseHandler.GetHumanPose(ref _SourcePose);
+                    _TargetPoseHandler.GetHumanPose(ref _TargetPose);
 
+                    // Update avatar hand pose
+                    for (int i = 55; i < 95; i++)
+                    {
+                        _TargetPose.muscles[i] = _SourcePose.muscles[i];
+                    }
+
+                    // Update avatar human pose
+                    _TargetPose.bodyPosition = _TargetPose.bodyPosition + BodyPositionCorrection;
+                    _TargetPoseHandler.SetHumanPose(ref _TargetPose);
+                }
+
+            }
+        }
+
+        void OnAnimatorIK(int layerIndex)
+        {
             // Update wrist pose
-            if (_TargetHumanoidAvatar != null && _WristController != null)
+            if (_TargetAnimator != null && _WristController != null)
             {
-                _TargetLeftHandWrist.position = _WristController._LeftHandTrackingReference.position;
-                _TargetLeftHandWrist.rotation = _WristController._LeftHandTrackingReference.rotation;
-                _TargetRightHandWrist.position = _WristController._RightHandTrackingReference.position;
-                _TargetRightHandWrist.rotation = _WristController._RightHandTrackingReference.rotation;
+                _TargetAnimator.SetIKPosition(AvatarIKGoal.LeftHand, _WristController._LeftHandTrackingReference.position);
+                _TargetAnimator.SetIKRotation(AvatarIKGoal.LeftHand, _WristController._LeftHandTrackingReference.rotation);
+                _TargetAnimator.SetIKPosition(AvatarIKGoal.RightHand, _WristController._RightHandTrackingReference.position);
+                _TargetAnimator.SetIKRotation(AvatarIKGoal.RightHand, _WristController._RightHandTrackingReference.rotation);
             }
         }
 
@@ -90,10 +110,8 @@ namespace HandPoseTransfer.OculusQuest
         {
             if (_TargetHumanoidAvatar != null)
             {
-                var targetAnimator = _TargetHumanoidAvatar.GetComponent<Animator>();
-                _TargetPoseHandler = new HumanPoseHandler(targetAnimator.avatar, _TargetHumanoidAvatar.transform);
-                _TargetLeftHandWrist = targetAnimator.GetBoneTransform(HumanBodyBones.LeftHand);
-                _TargetRightHandWrist = targetAnimator.GetBoneTransform(HumanBodyBones.RightHand);
+                _TargetAnimator = _TargetHumanoidAvatar.GetComponent<Animator>();
+                _TargetPoseHandler = new HumanPoseHandler(_TargetAnimator.avatar, _TargetHumanoidAvatar.transform);
             }
         }
 
@@ -112,11 +130,9 @@ namespace HandPoseTransfer.OculusQuest
             var rightHandRotation = Quaternion.Euler(0, 0, 0);
             skeletonBuilder.UpdateRotation(HumanBodyBones.RightHand, rightHandRotation);
 
-            _LeftHandOVRSkelton = _LeftOVRHand.GetComponent<OVRSkeleton>();
-            AddHandSkeletonBones(skeletonBuilder, true);
+            AddHandSkeletonBones(skeletonBuilder, true); // Left
 
-            _RightHandOVRSkelton = _RightOVRHand.GetComponent<OVRSkeleton>();
-            AddHandSkeletonBones(skeletonBuilder, false);
+            AddHandSkeletonBones(skeletonBuilder, false); // Right
 
             _Skeleton = skeletonBuilder.Skeleton;
 
@@ -147,7 +163,7 @@ namespace HandPoseTransfer.OculusQuest
                 OVRSkeleton.BoneId ovrBoneId = handBoneIdMap[boneKey];
                 if ((int)ovrBoneId < skeleton.Bones.Count)
                 {
-                    Transform skeletonBone = skeleton.Bones[(int)ovrBoneId].Transform;
+                    Transform skeletonBone = skeleton.BindPoses[(int)ovrBoneId].Transform;
                     Vector3 localPosition = skeletonBone.localPosition;
                     Quaternion localRotation = skeletonBone.localRotation;
 

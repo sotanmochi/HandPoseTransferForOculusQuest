@@ -324,9 +324,9 @@ MonoBehaviour:
   _RightWristPositionForController: {x: 0, y: -0.03, z: -0.1}
   _RightWristAnglesForController: {x: -90, y: -90, z: 0}
   _LeftWristPositionForHandTracking: {x: 0, y: 0, z: 0}
-  _LeftWristAnglesForHandTracking: {x: 0, y: 0, z: 180}
+  _LeftWristAnglesForHandTracking: {x: 0, y: 90, z: 180}
   _RightWristPositionForHandTracking: {x: 0, y: 0, z: 0}
-  _RightWristAnglesForHandTracking: {x: 180, y: 0, z: 180}
+  _RightWristAnglesForHandTracking: {x: 180, y: 90, z: 180}
 --- !u!4 &321095254
 Transform:
   m_ObjectHideFlags: 0

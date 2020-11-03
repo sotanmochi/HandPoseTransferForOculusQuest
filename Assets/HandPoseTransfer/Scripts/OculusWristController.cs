@@ -20,9 +20,9 @@ namespace HandPoseTransfer.OculusQuest
 
         [Header("Local transform for Hand Tracking")]
         [SerializeField] Vector3 _LeftWristPositionForHandTracking = new Vector3(0, 0, 0);
-        [SerializeField] Vector3 _LeftWristAnglesForHandTracking = new Vector3(0, 0, 180);
+        [SerializeField] Vector3 _LeftWristAnglesForHandTracking = new Vector3(0, 90, 180);
         [SerializeField] Vector3 _RightWristPositionForHandTracking = new Vector3(0, 0, 0);
-        [SerializeField] Vector3 _RightWristAnglesForHandTracking = new Vector3(180, 0, 180);
+        [SerializeField] Vector3 _RightWristAnglesForHandTracking = new Vector3(180, 90, 180);
 
         void Update()
         {

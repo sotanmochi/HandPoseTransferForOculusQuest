@@ -3,11 +3,14 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using Cysharp.Threading.Tasks;
 
 namespace HandPoseTransfer.OculusQuest
 {
     public class OVRHandBoneVisualizer : MonoBehaviour
     {
+        public bool IsAvailable { get; private set; }
+
         [SerializeField] OVRSkeleton _OVRHandSkeleton;
         [SerializeField] GameObject _XYZAxisPrefab;
         [SerializeField] float _AxisObjectScale = 0.2f;
@@ -37,8 +40,14 @@ namespace HandPoseTransfer.OculusQuest
             OVRSkeleton.BoneId.Hand_Pinky3,
         };
 
-        void Start()
+        async void Start()
         {
+            Debug.LogWarning("OVRHandSkeleton.IsInitialized (Before WaitUntil): " + _OVRHandSkeleton.IsInitialized);
+
+            await UniTask.WaitUntil(() => _OVRHandSkeleton.IsInitialized);
+
+            Debug.LogWarning("OVRHandSkeleton.IsInitialized (After WaitUntil): " + _OVRHandSkeleton.IsInitialized);
+
             foreach (OVRSkeleton.BoneId boneId in _HandBoneIdList)
             {
                 Transform boneTransform = _OVRHandSkeleton.Bones[(int)boneId].Transform;
@@ -57,6 +66,8 @@ namespace HandPoseTransfer.OculusQuest
                 go.transform.rotation = _HandBoneTransforms[boneId].rotation;
                 _BoneVisualizerTransforms[boneId] = go.transform;
             }
+
+            IsAvailable = true;
         }
 
         void Update()
